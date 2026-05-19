@@ -1,4 +1,4 @@
-# Clase 08 - Completando el CRUD: POST, PUT y DELETE
+# Clase 02 - Completando el CRUD: POST, PUT y DELETE
 
 ## 🎯 Objetivos de Aprendizaje
 
