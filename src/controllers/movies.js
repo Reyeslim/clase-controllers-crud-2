@@ -1,4 +1,5 @@
 import { moviesService } from "../services/movies.js"
+import CError, { Selector } from "../utils/error.js"
 
 const getMovies = (req, res) => {
   const data = moviesService.getAllMovies()
@@ -8,15 +9,17 @@ const getMovies = (req, res) => {
   })
 }
 
-const getMovieById = (req, res) => {
+const getMovieById = (req, res, next) => {
   const id = parseInt(req.params.id)
   const movie = moviesService.getMovieById(id)
 
   if (!movie) {
-    return res.status(404).json({
-      ok: false,
-      message: "Película no encontrada",
-    })
+    // return res.status(404).json({
+    //   ok: false,
+    //   message: "Película no encontrada",
+    // })
+
+    return next(new CError(Selector.NOT_FOUND))
   }
 
   res.json({
@@ -25,7 +28,58 @@ const getMovieById = (req, res) => {
   })
 }
 
+const createMovie = (req, res) => {
+  const { title, year, director } = req.body // destructuring datos del body
+
+  // Validación rápida
+  if (!title || !year) {
+    return res
+      .status(400) // Bad Request, el servidor no pudo entender ni procesar la solicitud
+      .json({ ok: false, message: "Título y año son obligatorios" })
+  }
+
+  const newMovie = moviesService.createMovie({ title, year, director })
+  res.status(201).json({ ok: true, data: newMovie }) // 201 created
+}
+
+const updateMovie = (req, res) => {
+  const id = parseInt(req.params.id)
+  const updatedMovie = moviesService.updateMovie(id, req.body)
+
+  if (!updatedMovie) {
+    return res.status(404).json({
+      ok: false,
+      message: "Película no encontrada",
+    })
+  }
+
+  res.json({
+    ok: true,
+    data: updatedMovie,
+  })
+}
+
+const deleteMovie = (req, res) => {
+  const id = parseInt(req.params.id)
+  const deletedMovie = moviesService.deleteMovie(id)
+
+  if (!deletedMovie) {
+    return res.status(404).json({
+      ok: false,
+      message: "Película no encontrada",
+    })
+  }
+
+  res.json({
+    ok: true,
+    message: "Película eliminada correctamente",
+  })
+}
+
 export const moviesController = {
   getMovies,
   getMovieById,
+  createMovie,
+  updateMovie,
+  deleteMovie,
 }
